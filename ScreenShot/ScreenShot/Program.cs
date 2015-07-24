@@ -55,8 +55,26 @@ namespace ScreenShot
         }
         static void Main(string[] args)
         {
-            //Console.WriteLine(args[1]);
-            ScreenShot.CaptureScreen(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), args[2]);
+            if (args.Length < 3)
+            {
+                Console.WriteLine("Usage: ScreenShot seconds limit destDir");
+                Console.WriteLine("seconds: int");
+                Console.WriteLine("limit: int");
+                Console.WriteLine("destDir: valid path");
+                return;
+            }
+            try
+            {
+                ScreenShot.CaptureScreen(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), args[2]);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                Console.WriteLine("Usage: ScreenShot seconds limit destDir");
+                Console.WriteLine("seconds: int");
+                Console.WriteLine("limit: int");
+                Console.WriteLine("destDir: valid path");
+            }
         }
     }
 }
