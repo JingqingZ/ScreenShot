@@ -20,22 +20,31 @@ namespace ScreenShot
             String[] filePaths = Directory.GetFiles(destDir);
             foreach (String filePath in filePaths)
                 File.Delete(filePath);
-
-            while (id < limit)
+            StreamWriter outfile = new StreamWriter(destDir + "\\log.txt", false);
+            try
             {
-                Rectangle bounds = Screen.GetBounds(Point.Empty);
-                using (Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height))
+                while (id < limit || limit == -1)
                 {
-                    using (Graphics g = Graphics.FromImage(bitmap))
-                    {
-                        g.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
-                    }
-                    bitmap.Save(destDir + "\\" + id + ".png", ImageFormat.Png);
-                    id ++;
+                    Rectangle bounds = Screen.GetBounds(Point.Empty);
+                    Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height);
+                    Graphics g = Graphics.FromImage(bitmap);
+                    g.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
+                    string name = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
+                    bitmap.Save(destDir + "\\" + name + ".png", ImageFormat.Png);
+                    Console.WriteLine(destDir + "\\" + name + ".png saved.");
+                    outfile.WriteLine(destDir + "\\" + name + ".png saved.");
+                    outfile.Flush();
+                    id++;
                     Thread.Sleep(seconds * 1000);
-                }
-
-            } 
+                } 
+            }
+            catch (Exception e)
+            {
+                outfile.WriteLine(e.ToString());
+                outfile.Flush();
+            }
+            outfile.Close();
+          
         }
         static void Main(string[] args)
         {
