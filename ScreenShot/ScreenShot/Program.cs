@@ -30,7 +30,7 @@ namespace ScreenShot
                     {
                         g.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
                     }
-                    bitmap.Save(destDir + "\\" + id + ".bmp", ImageFormat.Bmp);
+                    bitmap.Save(destDir + "\\" + id + ".png", ImageFormat.Png);
                     id ++;
                     Thread.Sleep(seconds * 1000);
                 }
