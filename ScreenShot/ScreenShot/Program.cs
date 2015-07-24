@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -21,9 +23,9 @@ namespace ScreenShot
             foreach (String filePath in filePaths)
                 File.Delete(filePath);
             StreamWriter outfile = new StreamWriter(destDir + "\\log.txt", false);
-            try
+            while (id < limit || limit == -1)
             {
-                while (id < limit || limit == -1)
+                try
                 {
                     Rectangle bounds = Screen.GetBounds(Point.Empty);
                     Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height);
@@ -35,16 +37,21 @@ namespace ScreenShot
                     outfile.WriteLine(destDir + "\\" + name + ".png saved.");
                     outfile.Flush();
                     id++;
-                    Thread.Sleep(seconds * 1000);
-                } 
-            }
-            catch (Exception e)
-            {
-                outfile.WriteLine(e.ToString());
-                outfile.Flush();
+                    Thread.Sleep(seconds*1000);
+                }
+                catch (Exception e)
+                {
+                    outfile.WriteLine(e.ToString());
+                    outfile.Flush();
+                    if (e.GetType() == new ExternalException().GetType() ||
+                        e.GetType() == new IOException().GetType() ||
+                        e.GetType() == new EncoderFallbackException().GetType())
+                    {
+                        break;
+                    }
+                }
             }
             outfile.Close();
-          
         }
         static void Main(string[] args)
         {
