@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -15,32 +16,72 @@ namespace ScreenShot
 {
     class ScreenShot
     {
-        public static void CaptureScreen(int seconds, int limit, string destDir)
+        public static void deleteOldShot(int weeks, string destDir, StreamWriter outfile)
         {
-            int id = 0;
-            Directory.CreateDirectory(destDir);
-            String[] filePaths = Directory.GetFiles(destDir);
-            foreach (String filePath in filePaths)
-                File.Delete(filePath);
-            StreamWriter outfile = new StreamWriter(destDir + "\\log.txt", false);
-            while (id < limit || limit == -1)
+            DirectoryInfo info = new DirectoryInfo(destDir);
+            FileInfo[] fileInfos = info.GetFiles().OrderBy(p => p.CreationTime).ToArray();
+            foreach (FileInfo fileInfo in fileInfos)
+            {
+                string imagePath = fileInfo.Name.Replace(destDir + "\\", "").Replace(".png", "");
+                try
+                {
+                    DateTime datePath = DateTime.ParseExact(imagePath, "yyyy-MM-dd-HH-mm-ss",
+                        CultureInfo.InvariantCulture);
+                    if ((DateTime.Now - datePath).Days > weeks*7)
+                    {
+                        File.Delete(destDir + "\\" + fileInfo.Name);
+                        Console.WriteLine(destDir + "\\" + fileInfo.Name + " deleted!");
+                        outfile.WriteLine(destDir + "\\" + fileInfo.Name + " deleted!");
+                    }
+                    else break;
+                }
+                catch (Exception e)
+                {
+                    continue;
+                }
+            }
+            return;
+        }
+
+        // capture screens every X seconds
+        // delete images older than Y weeks automatically
+        // save images in the destination directory
+        public static void CaptureScreen(int seconds, int weeks, string destDir)
+        {
+            // create destination folders and log.txt
+            String imageDir = destDir + "\\images";
+            Directory.CreateDirectory(imageDir);
+            StreamWriter outfile = new StreamWriter(destDir + "\\log.txt", true);
+            // delete images older than X weeks
+            deleteOldShot(weeks, imageDir, outfile);
+
+            DateTime currentDate = DateTime.Now;  
+            while (true)
             {
                 try
                 {
+                    // delete old images everyday
+                    if ((DateTime.Now - currentDate).Days >= 1)
+                    {
+                        currentDate = DateTime.Now;
+                        deleteOldShot(weeks, imageDir, outfile);
+                    }
+                    // capture screen
                     Rectangle bounds = Screen.GetBounds(Point.Empty);
                     Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height);
                     Graphics g = Graphics.FromImage(bitmap);
                     g.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
                     string name = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
-                    bitmap.Save(destDir + "\\" + name + ".png", ImageFormat.Png);
-                    Console.WriteLine(destDir + "\\" + name + ".png saved.");
-                    outfile.WriteLine(destDir + "\\" + name + ".png saved.");
+                    bitmap.Save(imageDir + "\\" + name + ".png", ImageFormat.Png);
+                    Console.WriteLine(imageDir + "\\" + name + ".png saved.");
+                    outfile.WriteLine(imageDir + "\\" + name + ".png saved.");
                     outfile.Flush();
-                    id++;
+                    
                     Thread.Sleep(seconds*1000);
                 }
                 catch (Exception e)
                 {
+                    // exception handlers
                     outfile.WriteLine(e.ToString());
                     outfile.Flush();
                     if (e.GetType() == new ExternalException().GetType() ||
@@ -57,10 +98,10 @@ namespace ScreenShot
         {
             if (args.Length < 3)
             {
-                Console.WriteLine("Usage: ScreenShot seconds limit destDir");
-                Console.WriteLine("seconds: int");
-                Console.WriteLine("limit: int");
-                Console.WriteLine("destDir: valid path");
+                Console.WriteLine("Usage: ScreenShot seconds weeks destDir");
+                Console.WriteLine("seconds: int, capture screen each X seconds");
+                Console.WriteLine("weeks: int, delete images older than X weeks");
+                Console.WriteLine("destDir: string, save images to this folder");
                 return;
             }
             try
@@ -70,10 +111,10 @@ namespace ScreenShot
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                Console.WriteLine("Usage: ScreenShot seconds limit destDir");
-                Console.WriteLine("seconds: int");
-                Console.WriteLine("limit: int");
-                Console.WriteLine("destDir: valid path");
+                Console.WriteLine("Usage: ScreenShot seconds weeks destDir");
+                Console.WriteLine("seconds: int, capture screen each X seconds");
+                Console.WriteLine("weeks: int, delete images older than X weeks");
+                Console.WriteLine("destDir: string, save images to this folder");
             }
         }
     }
