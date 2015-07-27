@@ -6,9 +6,9 @@ Screen shot in C#
 ```
 ScreenShot.exe seconds weeks destDir
 ```
-seconds: int, capture screen each X seconds
-weeks: int, delete images older than X weeks
-destDir: string, save images to this folder
+seconds: int, capture screen each X seconds <br/>
+weeks: int, delete images older than X weeks <br/>
+destDir: string, save images to this folder <br/>
 
 # Notes
 
