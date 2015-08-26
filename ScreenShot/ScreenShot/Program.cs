@@ -104,17 +104,17 @@ namespace ScreenShot
                 Console.WriteLine("destDir: string, save images to this folder");
                 return;
             }
-            try
+            while (true)
             {
-                ScreenShot.CaptureScreen(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), args[2]);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-                Console.WriteLine("Usage: ScreenShot seconds weeks destDir");
-                Console.WriteLine("seconds: int, capture screen each X seconds");
-                Console.WriteLine("weeks: int, delete images older than X weeks");
-                Console.WriteLine("destDir: string, save images to this folder");
+                try
+                {
+                    ScreenShot.CaptureScreen(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), args[2]);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                    Thread.Sleep(120 * 1000);
+                }
             }
         }
     }
