@@ -67,10 +67,14 @@ namespace ScreenShot
                         deleteOldShot(weeks, imageDir, outfile);
                     }
                     // capture screen
-                    Rectangle bounds = Screen.GetBounds(Point.Empty);
-                    Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height);
+                    // Determine the size of the "virtual screen", which includes all monitors.
+                    int screenLeft = SystemInformation.VirtualScreen.Left;
+                    int screenTop = SystemInformation.VirtualScreen.Top;
+                    int screenWidth = SystemInformation.VirtualScreen.Width;
+                    int screenHeight = SystemInformation.VirtualScreen.Height;
+                    Bitmap bitmap = new Bitmap(screenWidth, screenHeight);
                     Graphics g = Graphics.FromImage(bitmap);
-                    g.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
+                    g.CopyFromScreen(screenLeft, screenTop, 0, 0, bitmap.Size);
                     string name = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
                     bitmap.Save(imageDir + "\\" + name + ".png", ImageFormat.Png);
                     Console.WriteLine(imageDir + "\\" + name + ".png saved.");
